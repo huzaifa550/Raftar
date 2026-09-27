@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      // HMR is disabled in this environment. Intercept vite-hmr WebSocket attempts.
+      (function() {
+        if (typeof window !== 'undefined') {
+          const OrigWebSocket = window.WebSocket;
+          if (OrigWebSocket) {
+            window.WebSocket = function(url, protocols) {
+              if (
+                protocols === 'vite-hmr' ||
+                (typeof url === 'string' && (url.includes('token=') || url.includes('vite')))
+              ) {
+                const listeners = {};
+                return {
+                  OPEN: 1,
+                  CLOSED: 3,
+                  CLOSING: 2,
+                  CONNECTING: 0,
+                  readyState: 1,
+                  addEventListener: function(event, callback) {
+                    if (!listeners[event]) listeners[event] = [];
+                    listeners[event].push(callback);
+                    if (event === 'open') {
+                      setTimeout(() => {
+                        try { callback({ type: 'open' }); } catch (e) {}
+                      }, 0);
+                    }
+                  },
+                  removeEventListener: function(event, callback) {
+                    if (listeners[event]) {
+                      listeners[event] = listeners[event].filter(cb => cb !== callback);
+                    }
+                  },
+                  dispatchEvent: function(e) {
+                    if (listeners[e.type]) {
+                      listeners[e.type].forEach(cb => { try { cb(e); } catch(err) {} });
+                    }
+                    return true;
+                  },
+                  send: function() {},
+                  close: function() {},
+                };
+              }
+              return new OrigWebSocket(url, protocols);
+            };
+            Object.assign(window.WebSocket, OrigWebSocket);
+          }
+
+          // Suppress any stray WebSocket closed errors from reaching the UI console
+          const origConsoleError = console.error;
+          console.error = function(...args) {
+            const msg = args.map(a => (typeof a === 'string' ? a : (a && a.message) || '')).join(' ');
+            if (msg.includes('failed to connect to websocket') || msg.includes('WebSocket closed without opened')) {
+              return;
+            }
+            origConsoleError.apply(console, args);
+          };
+        }
+      })();
+    </script>
+    <title>Raftaar Marketplace | Food, Grocery & Essentials Delivery</title>
+    <meta name="description" content="Multi-vendor food, grocery, and essentials delivery marketplace built for the Pakistani market with real-time tracking, multi-role dashboards, and localized payments." />
+    <meta property="og:title" content="Raftaar Marketplace | Food, Grocery & Essentials Delivery" />
+    <meta property="og:description" content="Multi-vendor food, grocery, and essentials delivery marketplace built for the Pakistani market with real-time tracking, multi-role dashboards, and localized payments." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

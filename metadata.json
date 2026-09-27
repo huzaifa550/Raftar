@@ -1,0 +1,6 @@
+{
+  "name": "Raftaar Marketplace",
+  "description": "Multi-vendor food, grocery, and essentials delivery marketplace built for the Pakistani market with real-time tracking, multi-role dashboards, and localized payments.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
